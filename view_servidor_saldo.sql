@@ -1,0 +1,1 @@
+SELECT nome_servidor as NOME, saldo_servidor_grupo as SALDO FROM servidores, servidores_grupos WHERE id_servidor == id_servidor_servidor_grupo AND id_grupo_servidor_grupo ==1
