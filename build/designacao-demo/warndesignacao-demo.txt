@@ -1,0 +1,17 @@
+missing module named resource - imported by posix, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named posix - imported by os, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named _posixsubprocess - imported by subprocess, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named 'org.python' - imported by pickle, G:\PycharmProjects\designacao\designacao-demo.py, xml.sax
+missing module named readline - imported by cmd, code, pdb, G:\PycharmProjects\designacao\designacao-demo.py
+excluded module named _frozen_importlib - imported by importlib, importlib.abc, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named _frozen_importlib_external - imported by importlib._bootstrap, importlib, importlib.abc, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named _winreg - imported by platform, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named _scproxy - imported by urllib.request
+missing module named java - imported by platform, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named 'java.lang' - imported by platform, G:\PycharmProjects\designacao\designacao-demo.py, xml.sax._exceptions
+missing module named vms_lib - imported by platform, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named termios - imported by tty, G:\PycharmProjects\designacao\designacao-demo.py, getpass
+missing module named grp - imported by shutil, tarfile, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named org - imported by copy, G:\PycharmProjects\designacao\designacao-demo.py
+missing module named pwd - imported by posixpath, shutil, tarfile, http.server, webbrowser, G:\PycharmProjects\designacao\designacao-demo.py, netrc, getpass
+missing module named _dummy_threading - imported by dummy_threading, G:\PycharmProjects\designacao\designacao-demo.py
