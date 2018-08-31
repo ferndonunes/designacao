@@ -316,14 +316,14 @@ def menu_designacao(tp):
     grupos.append('s')
     print("[ S ] - SAIR")
 
-    id_grupo = input("\nDigite o Código do GRUPO para a Distribuição: ")
+    id_grupo = input("\nDigite o Código do GRUPO para a Distribuição ou [S] para Sair: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while id_grupo not in grupos:
         menu_designacao(tp)
 
     # Se escolher S, volta para o Menu Principal
-    if (id_grupo.lower() == 's'):
+    if (id_grupo.lower() == 'S'):
         menu()
 
     # Lista SERVIDORES Ativos no Grupo escolhido
@@ -421,3 +421,8 @@ def menu_designacao(tp):
 
 # Chamada Inicial do Sistema
 menu()
+
+
+# Arrumar:
+# str.lower (opção sair)
+#
