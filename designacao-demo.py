@@ -43,37 +43,42 @@ def cupons(id_grupo):
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
-    linha_original = linha
     lista = []
 
     # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
     #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
     for i in linha:
-
+        id_i = i[0]
         saldo_atual = int(i[3])
         peso_atual  = int(i[2])
-        participa   = False
+        participa = False
 
         # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < 3 and peso_atual == 1):
+        if (saldo_atual < 2 and peso_atual == 1):
             lista.append(list(i))
         # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
-        elif (saldo_atual < 6 and peso_atual == 2):
-            for x in linha_original:
-                peso_x = x[2]
-                id_i = i[0]
+        elif (saldo_atual < 4 and peso_atual == 2):
+
+            for x in linha:
                 id_x = x[0]
+                peso_x = int(x[2])
                 saldo_x = int(x[3])
-                if(peso_x == 2 and id_x != id_i):
-                    #print(i[1] + ' ' + str(saldo_atual) + ' | ' + x[1] + ' ' + str(saldo_x))
-                    if (saldo_atual <= (saldo_x)): # Deixa 2 Processos de Intervalo
+                diferenca = int(saldo_atual - saldo_x)
+                participa = False
+
+                if((id_i != id_x) and (peso_x == 2)):
+                    if(diferenca <= 0): # Diferença de 2 Processos
                         participa = True
+                        print('Diferenca: ' + str(diferenca) + ' De: ' + str(i[1]) + ' Para: ' + str(x))
                         break
-            if participa:
+
+
+
+        if participa:
                 lista.append(list(i))
 
     con.close()
-    #print("\nParticipantes: " + str(lista))
+    print("\nParticipantes: " + str(lista))
     return lista
 
 

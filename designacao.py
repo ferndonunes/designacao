@@ -61,13 +61,16 @@ def cupons(id_grupo):
         # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
         elif (saldo_atual < 6 and peso_atual == 2):
             for x in linha_original:
-                peso_x = x[2]
-                id_i = i[0]
-                id_x = x[0]
+                peso_x = int(x[2])
+                id_i = int(i[0])
+                id_x = int(x[0])
                 saldo_x = int(x[3])
-                if(peso_x == 2 and id_x != id_i):
+                if((peso_x == 2) and (id_x != id_i)):
                     #print(i[1] + ' ' + str(saldo_atual) + ' | ' + x[1] + ' ' + str(saldo_x))
-                    if (saldo_atual <= (saldo_x)): # Deixa 2 Processos de Intervalo
+                    if ((saldo_atual - saldo_x) >= 2): # Deixa 2 Processos de Intervalo
+                        participa = False
+                        break
+                    else:
                         participa = True
                         break
             if participa:
@@ -427,5 +430,5 @@ menu()
 
 
 # Arrumar:
-# str.lower (opção sair)
-#
+# Compensacao de Saldo na Distribuiçao Manual
+# Equilibrio no Sorteio Automatico
