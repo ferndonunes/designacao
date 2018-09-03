@@ -455,7 +455,3 @@ def menu_designacao(tp):
 
 # Chamada Inicial do Sistema
 menu()
-
-
-# Arrumar:
-# Compensacao de Saldo na Distribuiçao Manual
