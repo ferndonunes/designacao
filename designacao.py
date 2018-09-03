@@ -3,7 +3,7 @@
 #
 # Sistema para Designação Automática de Autos Judiciais e Extrajudiciais
 # Entrada: Número do Processo
-# Distribuição Automática e Aleatória com Diferença Máxima de 3
+# Distribuição Automática e Aleatória com Diferença Máxima de 2
 # Distribuição Equilibrada por Grupos
 # Manipulação de Arquivos para Relatórios
 #
@@ -12,7 +12,7 @@
 @autor:         Fernando Cesar Nunes
 @contato:       fcesar@mpf.mp.br
 @organização:   Ministerio Publico Federal
-@data:          01/09/2018
+@data:          03/09/2018
 """
 
 # Importação dos Módulos Necessários
@@ -144,6 +144,7 @@ def saldo_grupo(id_grupo):
         print(i[0] + " : "+ str(i[1]))
     con.close()
 
+
 # Funçao que Insere as Designaçoes no Relatorio
 def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
     hoje = datetime.datetime.now()
@@ -182,7 +183,7 @@ def menu():
     print("[ S ] - SAIR")
 
     # Carrega o Menu enquanto nao Escolher uma Opçao Valida
-    opcoes = ['1','2','3','4','5','6','s']
+    opcoes = ['1','2','3','4','5','6','s','S']
     escolha = input("\nEscolha sua Opção [1/2/3/4/5/6] ou [S] para Sair: ")
     while str(escolha.lower()) not in opcoes:
         menu()
@@ -216,7 +217,6 @@ def menu():
         exit()
 
 # ---------------------------------------------------------------------------------------------------------------------4
-
 
 # Mostra a Tela do Relatorio
 def menu_relatorio():

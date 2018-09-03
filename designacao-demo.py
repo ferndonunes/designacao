@@ -3,7 +3,7 @@
 #
 # Sistema para Designação Automática de Autos Judiciais e Extrajudiciais
 # Entrada: Número do Processo
-# Distribuição Automática e Aleatória com Diferença Máxima de 3
+# Distribuição Automática e Aleatória com Diferença Máxima de 2
 # Distribuição Equilibrada por Grupos
 # Manipulação de Arquivos para Relatórios
 #
@@ -12,7 +12,7 @@
 @autor:         Fernando Cesar Nunes
 @contato:       fcesar@mpf.mp.br
 @organização:   Ministerio Publico Federal
-@data:          01/09/2018
+@data:          03/09/2018
 """
 
 # Importação dos Módulos Necessários
