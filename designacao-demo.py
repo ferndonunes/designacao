@@ -45,40 +45,46 @@ def cupons(id_grupo):
     linha = c.fetchall()
     lista = []
 
+    # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
+    intervalo = 2
+    saldo_max = 4
+
     # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
     #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
     for i in linha:
         id_i = i[0]
         saldo_atual = int(i[3])
         peso_atual  = int(i[2])
-        participa = False
+        participa = 0
+        nao_participa = 0
 
         # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < 2 and peso_atual == 1):
+        if (saldo_atual < intervalo and peso_atual == 1):
             lista.append(list(i))
         # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
-        elif (saldo_atual < 4 and peso_atual == 2):
+        elif (saldo_atual < saldo_max and peso_atual == 2):
 
+            # Compara os Saldos dos Servidores de Peso 2
             for x in linha:
                 id_x = x[0]
                 peso_x = int(x[2])
                 saldo_x = int(x[3])
                 diferenca = int(saldo_atual - saldo_x)
-                participa = False
 
+                # Compara o Saldo com os Demais Servidores com o mesmo Peso
                 if((id_i != id_x) and (peso_x == 2)):
-                    if(diferenca <= 0): # Diferença de 2 Processos
-                        participa = True
-                        print('Diferenca: ' + str(diferenca) + ' De: ' + str(i[1]) + ' Para: ' + str(x))
-                        break
 
-
-
-        if participa:
+                    # Participa se a Diferença de Processos for Menor que o Intervalo
+                    if(diferenca < intervalo):
+                        participa += 1
+                    else:
+                        nao_participa += 1
+        # Se o Total de Vezes que Participa for Maior, entra no Sorteio
+        if (participa > nao_participa):
                 lista.append(list(i))
 
     con.close()
-    print("\nParticipantes: " + str(lista))
+    print("\n>>>: " + str(lista))
     return lista
 
 
@@ -94,10 +100,30 @@ def atualiza_saldo(novo_saldo, id_servidor_grupo):
 
 # Zera os Saldos dos Servidores no Grupo
 def zera_saldo(id_grupo):
+
+    # Saldo Máximo por Servidor
+    saldo_max = 4
+
+    # Calcula os Saldos dos Servidores
     con = sqlite3.connect('designacao.db')
-    sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == 0 WHERE id_grupo_servidor_grupo == ?"
+    sql = "SELECT id_servidor_grupo, saldo_servidor_grupo FROM servidores_grupos WHERE id_grupo_servidor_grupo == ? "
     c = con.cursor()
     c.execute(sql, str(id_grupo))
+    linha = c.fetchall()
+
+    # Se o Saldo Atual for Maior que o Maximo por conta de Distribuiçao Manual
+    # Subtrai a Diferença para Equilibrar o Sorteio
+    for i in linha:
+        id_servidor_grupo = i[0]
+        saldo = int(i[1])
+        if (saldo > saldo_max):
+            novo_saldo = saldo - saldo_max
+        else:
+            novo_saldo = 0
+        sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
+        c_update = con.cursor()
+        c_update.execute(sql, (str(novo_saldo), str(id_servidor_grupo)))
+
     con.commit()
     con.close()
 
@@ -125,7 +151,7 @@ def exibe_saldo():
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    01/09/2018 v1.0 *")
+    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    01/09/2018 v1.3 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -163,18 +189,9 @@ while opcao.lower() != 's':
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
-
-
 """
 
-
+# GERA GRAFICO
 def gera_grafico():
 
     import matplotlib.pyplot as plt
@@ -207,81 +224,5 @@ def gera_grafico():
 servidores = {1: 'ANA CLAUDIA MOLONHI', 2: 'RAFAEL MELLO DE ROSA MENDES', 3: 'SERGIO NOGAI'}
 designado = dict([random.choice(list(servidores.items()))])
 print(designado)
-
-
-
-    for i in lista:
-        saldo = i.split(':')
-        print(saldo[2])
-
-
-
-
-        criterio1 = 0
-        for k, v in saldo.items():
-            if (k == d[0] and v < 3):
-                criterio1 = 1
-                #print('Participa: ' + str(d[1]))
-
-        criterio2 = 0
-        for k, v in saldo.items():
-            if (k != d[0]):
-                criterio2 = 1
-                print('Participa: ' + str(d[1]))
-
-
-# Calcula o Saldo de Cada Servidor por Grupo e retorna um Dicionario
-def calcula_saldo():
-    con = sqlite3.connect('designacao.db')
-    sql_saldo = "SELECT id_servidor_relatorio, count(id_relatorio) " \
-                "FROM relatorios, servidores " \
-                "WHERE id_servidor_relatorio == id_servidor AND st_servidor = 'A' " \
-                "GROUP BY id_servidor_relatorio"
-
-    cur = con.cursor()
-    cur.execute(sql_saldo)
-    total = cur.fetchall()
-    dic_saldo = {}
-    for s in total:
-       dic_saldo.update({s[0]:s[1]})
-    con.close()
-    return dic_saldo
-
-# Verifica se o Servidor vai Participar do Sorteio
-def participa_sorteio():
-    return true
-
-
-
-
-    #
-    saldo = calcula_saldo()
-    print(saldo)
-
-
-    # Percorre o Dicionario Calculando a Diferença do Saldo
-    # Caso seja menor que 3 participa do Sorteio (sorteio = true)
-    # Caso nao possua nenhum, participa, também
-
-
-
-
-
-
-
-
-
-
-
-        # Monta a Lista por Peso
-        if saldo_atual < 3 and peso_atual == 1:
-            count=0
-            if peso_atual > 1:
-                while count < i[2]:
-                   count+= 1
-                   lista.append(list(i))
-            else:
-                lista.append(list(i))
-
 
 """

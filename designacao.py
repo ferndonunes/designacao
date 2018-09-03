@@ -44,36 +44,44 @@ def cupons(id_grupo):
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
-    linha_original = linha
     lista = []
+
+    # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
+    intervalo = 2
+    saldo_max = 4
 
     # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
     #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
     for i in linha:
-
+        id_i = i[0]
         saldo_atual = int(i[3])
         peso_atual  = int(i[2])
-        participa   = False
+        participa = 0
+        nao_participa = 0
 
         # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < 3 and peso_atual == 1):
+        if (saldo_atual < intervalo and peso_atual == 1):
             lista.append(list(i))
         # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
-        elif (saldo_atual < 6 and peso_atual == 2):
-            for x in linha_original:
+        elif (saldo_atual < saldo_max and peso_atual == 2):
+
+            # Compara os Saldos dos Servidores de Peso 2
+            for x in linha:
+                id_x = x[0]
                 peso_x = int(x[2])
-                id_i = int(i[0])
-                id_x = int(x[0])
                 saldo_x = int(x[3])
-                if((peso_x == 2) and (id_x != id_i)):
-                    #print(i[1] + ' ' + str(saldo_atual) + ' | ' + x[1] + ' ' + str(saldo_x))
-                    if ((saldo_atual - saldo_x) >= 2): # Deixa 2 Processos de Intervalo
-                        participa = False
-                        break
+                diferenca = int(saldo_atual - saldo_x)
+
+                # Compara o Saldo com os Demais Servidores com o mesmo Peso
+                if((id_i != id_x) and (peso_x == 2)):
+
+                    # Participa se a Diferença de Processos for Menor que o Intervalo
+                    if(diferenca < intervalo):
+                        participa += 1
                     else:
-                        participa = True
-                        break
-            if participa:
+                        nao_participa += 1
+        # Se o Total de Vezes que Participa for Maior, entra no Sorteio
+        if (participa > nao_participa):
                 lista.append(list(i))
 
     con.close()
@@ -93,10 +101,30 @@ def atualiza_saldo(novo_saldo, id_servidor_grupo):
 
 # Zera os Saldos dos Servidores no Grupo
 def zera_saldo(id_grupo):
+
+    # Saldo Máximo por Servidor
+    saldo_max = 4
+
+    # Calcula os Saldos dos Servidores
     con = sqlite3.connect('designacao.db')
-    sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == 0 WHERE id_grupo_servidor_grupo == ?"
+    sql = "SELECT id_servidor_grupo, saldo_servidor_grupo FROM servidores_grupos WHERE id_grupo_servidor_grupo == ? "
     c = con.cursor()
     c.execute(sql, str(id_grupo))
+    linha = c.fetchall()
+
+    # Se o Saldo Atual for Maior que o Maximo por conta de Distribuiçao Manual
+    # Subtrai a Diferença para Equilibrar o Sorteio
+    for i in linha:
+        id_servidor_grupo = i[0]
+        saldo = int(i[1])
+        if (saldo > saldo_max):
+            novo_saldo = saldo - saldo_max
+        else:
+            novo_saldo = 0
+        sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
+        c_update = con.cursor()
+        c_update.execute(sql, (str(novo_saldo), str(id_servidor_grupo)))
+
     con.commit()
     con.close()
 
@@ -135,7 +163,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      01/09/2018 v1.0 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      01/09/2018 v1.3 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -345,6 +373,7 @@ def menu_designacao(tp):
     linha = c.fetchall()
     lst_manual = linha
     servidores = []
+    id_servidor = 0
 
     print("\n**********Servidores com Distribuição Aberta no Grupo**********\n")
 
@@ -399,8 +428,8 @@ def menu_designacao(tp):
             sorteio = cupons(int(id_grupo))  # Parametro: ID_GRUPO
 
             if len(sorteio) == 0:
-                zera_saldo(1)  # Parâmetro: ID_GRUPO
-                sorteio = cupons(1)  # Parametro: ID_GRUPO
+                zera_saldo(id_grupo)  # Parâmetro: ID_GRUPO
+                sorteio = cupons(id_grupo)  # Parametro: ID_GRUPO
 
             # Realiza o Sorteio
             # sorteado: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
@@ -431,4 +460,3 @@ menu()
 
 # Arrumar:
 # Compensacao de Saldo na Distribuiçao Manual
-# Equilibrio no Sorteio Automatico
