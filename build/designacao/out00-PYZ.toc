@@ -1,6 +1,6 @@
 ('G:\\PycharmProjects\\designacao\\build\\designacao\\out00-PYZ.pyz',
- [('_strptime', 'c:\\program files\\python36\\lib\\_strptime.py', 'PYMODULE'),
-  ('ntpath', 'c:\\program files\\python36\\lib\\ntpath.py', 'PYMODULE'),
+ [('ntpath', 'c:\\program files\\python36\\lib\\ntpath.py', 'PYMODULE'),
+  ('_strptime', 'c:\\program files\\python36\\lib\\_strptime.py', 'PYMODULE'),
   ('stringprep', 'c:\\program files\\python36\\lib\\stringprep.py', 'PYMODULE'),
   ('stat', 'c:\\program files\\python36\\lib\\stat.py', 'PYMODULE'),
   ('genericpath',
