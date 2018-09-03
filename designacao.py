@@ -163,7 +163,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      01/09/2018 v1.3 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      03/09/2018 v1.3 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -200,9 +200,11 @@ def menu():
         menu_designacao('A')
 
     elif escolha == '4':
+        # TRANCAR DISTRIBUICAO
         alterar_designacao('A', 'B')
 
     elif escolha == '5':
+        # ABRIR DISTRIBUICAO
         alterar_designacao('B', 'A')
 
     elif escolha == '6':
@@ -297,7 +299,6 @@ def alterar_designacao(st, nova_st):
         id_servidor = input("\nDigite o Código do Servidor para TRANCAR a Distribuição ou [ S ] para Sair: ")
     else:
         id_servidor = input("\nDigite o Código do Servidor para ABRIR a Distribuição ou [ S ] para Sair: ")
-
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while (id_servidor not in servidores):
