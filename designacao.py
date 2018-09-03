@@ -202,7 +202,7 @@ def menu_relatorio():
         print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
         grupos.append(str(i[0]))
     con.close()
-    grupos.append('s')
+    grupos.append('s','S')
     print("[ S ] - SAIR")
 
     id_grupo = input("\nDigite o Código do GRUPO para Visualizar o RELATÓRIO: ")
@@ -257,7 +257,7 @@ def alterar_designacao(st, nova_st):
         print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
         servidores.append(str(i[0]))
     con.close()
-    servidores.append('s')
+    servidores.append('s','S')
     print("[ S ] - SAIR")
 
     if(st == 'A'):
@@ -313,7 +313,7 @@ def menu_designacao(tp):
         print("[ " + str(i[0]) + " ]" + " - "+ str(i[1]))
         grupos.append(str(i[0]))
     con.close()
-    grupos.append('s')
+    grupos.append('s','S')
     print("[ S ] - SAIR")
 
     id_grupo = input("\nDigite o Código do GRUPO para a Distribuição ou [S] para Sair: ")
