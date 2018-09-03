@@ -323,7 +323,6 @@ def alterar_designacao(st, nova_st):
     if (repetir.lower() == 'n'):
         menu()
 
-
 # ---------------------------------------------------------------------------------------------------------------------
 
 # Funçao que monta a Tela JUDICIAL
