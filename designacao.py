@@ -326,7 +326,7 @@ def menu_designacao(tp):
         menu_designacao(tp)
 
     # Se escolher S, volta para o Menu Principal
-    if (id_grupo.lower() == 'S'):
+    if (id_grupo.lower() == 's'):
         menu()
 
     # Lista SERVIDORES Ativos no Grupo escolhido
@@ -351,7 +351,7 @@ def menu_designacao(tp):
     con.close()
 
     # Solicita que Informe o Tipo de Designação
-    tp_designacao = input("\nDigite o tipo de Distribuição [A]utomática / [M]anual: ")
+    tp_designacao = input("\nDigite o tipo de Distribuição [A]utomática / [M]anual ou [S]air: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while (tp_designacao.lower() != 'a' and tp_designacao.lower() != 'm'):
