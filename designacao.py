@@ -164,7 +164,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      03/09/2018 v1.3 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      03/09/2018 v1.4 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -395,6 +395,9 @@ def menu_designacao(tp):
         while id_servidor not in servidores:
             menu_designacao(tp)
     processo = input("\nDigite o número do DOCUMENTO ou dos AUTOS: ")
+
+    if (processo == ''):
+        processo = 'NAO INFORMADO'
 
     # Exibe tela de Confirmação
     confirmacao = input("\nConfirmar a Distribuição (S)im / (N)ão: ")
