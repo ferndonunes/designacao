@@ -12,7 +12,7 @@
 @autor:         Fernando Cesar Nunes
 @contato:       fcesar@mpf.mp.br
 @organização:   Ministerio Publico Federal
-@data:          03/09/2018
+@data:          04/09/2018
 """
 
 # Importação dos Módulos Necessários
@@ -44,6 +44,7 @@ def cupons(id_grupo):
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
     lista = []
+    con.close()
 
     # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
     intervalo = 2
@@ -83,8 +84,7 @@ def cupons(id_grupo):
         if (participa > nao_participa):
                 lista.append(list(i))
 
-    con.close()
-    print("\n>>>: " + str(lista))
+    # print("\n>>>: " + str(lista))
     return lista
 
 
@@ -137,11 +137,11 @@ def exibe_saldo():
     c = con.cursor()
     c.execute(sql)
     linha = c.fetchall()
+    con.close()
 
     for i in linha:
         print(i[0] + " : "+ str(i[1]))
 
-    con.close()
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ def exibe_saldo():
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    03/09/2018 v1.3 *")
+    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    04/09/2018 v1.5 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -181,14 +181,34 @@ while opcao.lower() != 's':
 
     cabecalho()
 
-    print("\nSorteado: " + str(sorteado[1]) + "\n")
+    print("\n>>> *** Sorteado *** <<<: " + sorteado[1] + "\n")
+
     exibe_saldo()
     opcao = input("\n[ ENTER ] para Distribuir ou [ S ] para Sair: ")
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 
 """
+# TERMCOLOR SAMPLES
+
+import sys
+from termcolor import colored, cprint
+
+text = colored('Hello, World!', 'red', attrs=['reverse', 'blink'])
+print(text)
+cprint('Hello, World!', 'green', 'on_red')
+
+print_red_on_cyan = lambda x: cprint(x, 'red', 'on_cyan')
+print_red_on_cyan('Hello, World!')
+print_red_on_cyan('Hello, Universe!')
+
+for i in range(10):
+    cprint(i, 'magenta', end=' ')
+
+cprint("Attention!", 'red', attrs=['bold'], file=sys.stderr)
+
 
 # GERA GRAFICO
 def gera_grafico():

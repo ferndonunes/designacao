@@ -12,7 +12,7 @@
 @autor:         Fernando Cesar Nunes
 @contato:       fcesar@mpf.mp.br
 @organização:   Ministerio Publico Federal
-@data:          03/09/2018
+@data:          04/09/2018
 """
 
 # Importação dos Módulos Necessários
@@ -44,6 +44,8 @@ def cupons(id_grupo):
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
+    con.close()
+
     lista = []
 
     # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
@@ -83,8 +85,6 @@ def cupons(id_grupo):
         # Se o Total de Vezes que Participa for Maior, entra no Sorteio
         if (participa > nao_participa):
                 lista.append(list(i))
-
-    con.close()
     #print("\nParticipantes: " + str(lista))
     return lista
 
@@ -129,22 +129,6 @@ def zera_saldo(id_grupo):
     con.close()
 
 
-# Mostra o Saldo por Grupo
-def saldo_grupo(id_grupo):
-    con = sqlite3.connect('designacao.db')
-    sql = "SELECT nome_servidor as NOME, saldo_servidor_grupo as SALDO " \
-          "FROM servidores, servidores_grupos " \
-          "WHERE id_servidor == id_servidor_servidor_grupo " \
-          "AND id_grupo_servidor_grupo == ?"
-    c = con.cursor()
-    c.execute(sql, str(id_grupo))
-    linha = c.fetchall()
-
-    for i in linha:
-        print(i[0] + " : "+ str(i[1]))
-    con.close()
-
-
 # Funçao que Insere as Designaçoes no Relatorio
 def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
     hoje = datetime.datetime.now()
@@ -157,14 +141,14 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
     con.commit()
     con.close()
 
-# ---------------------------------------------------------------------------------------------------------------------
+
 # ----------------------------------------------CODIGO DAS TELAS-------------------------------------------------------
-# ---------------------------------------------------------------------------------------------------------------------
+
 
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      03/09/2018 v1.4 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      04/09/2018 v1.5 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -174,9 +158,9 @@ def menu():
     limpa_tela()
     cabecalho()
     print("\n MENU PRINCIPAL \n")
-    print("[ 1 ] - JUDICIAL")
-    print("[ 2 ] - EXTRAJUDICIAL")
-    print("[ 3 ] - DOCUMENTO")
+    print("[ 1 ] - DISTRIBUIR JUDICIAL")
+    print("[ 2 ] - DISTRIBUIR EXTRAJUDICIAL")
+    print("[ 3 ] - DISTRIBUIR DOCUMENTO")
     print("[ 4 ] - TRANCAR DISTRIBUIÇÃO")
     print("[ 5 ] - ABRIR DISTRIBUIÇÃO")
     print("[ 6 ] - RELATÓRIO")
@@ -213,6 +197,7 @@ def menu():
         menu_relatorio()
 
     elif escolha.lower() == 's':
+        # SAIR
         limpa_tela()
         exit()
 
@@ -230,13 +215,11 @@ def menu_relatorio():
     c = con.cursor()
     c.execute(sql)
     linha = c.fetchall()
-    grupos = []
+    grupos = ['s', 'S']
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
         grupos.append(str(i[0]))
     con.close()
-    grupos.append('s')
-    grupos.append('S')
     print("[ S ] - SAIR")
 
     id_grupo = input("\nDigite o Código do GRUPO para Visualizar o RELATÓRIO: ")
@@ -269,7 +252,7 @@ def menu_relatorio():
         print(i[0] + " : "+ str(i[2]))
     con.close()
 
-    escolha = input("\nPressione [ ENTER ] para voltar ao Menu Principal.")
+    input("\nPressione [ ENTER ] para voltar ao Menu Principal.")
     menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -286,13 +269,11 @@ def alterar_designacao(st, nova_st):
     c = con.cursor()
     c.execute(sql, str(st))
     linha = c.fetchall()
-    servidores = []
+    servidores = ['s', 'S']
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
         servidores.append(str(i[0]))
     con.close()
-    servidores.append('s')
-    servidores.append('S')
     print("[ S ] - SAIR")
 
     if(st == 'A'):
@@ -341,13 +322,12 @@ def menu_designacao(tp):
     c = con.cursor()
     c.execute(sql, str(tp))
     linha = c.fetchall()
-    grupos = []
+    con.close()
+
+    grupos = ['s', 'S']
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - "+ str(i[1]))
         grupos.append(str(i[0]))
-    con.close()
-    grupos.append('s')
-    grupos.append('S')
     print("[ S ] - SAIR")
 
     id_grupo = input("\nDigite o Código do GRUPO para a Distribuição ou [S] para Sair: ")
@@ -371,6 +351,8 @@ def menu_designacao(tp):
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
+    con.close()
+
     lst_manual = linha
     servidores = []
     id_servidor = 0
@@ -380,7 +362,6 @@ def menu_designacao(tp):
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - "+ str(i[1]))
         servidores.append(str(i[0]))
-    con.close()
 
     # Solicita que Informe o Tipo de Designação
     tp_designacao = input("\nDigite o tipo de Distribuição [A]utomática / [M]anual ou [S]air: ")
@@ -424,7 +405,8 @@ def menu_designacao(tp):
                     atualiza_relatorio(i[0], id_grupo, processo, tp_designacao.upper())
 
                     # Imprime o Resultado da Designaçao Manual
-                    print("\n" + str(processo) + " >>> Designado MANUALMENTE para : " + str(nome_servidor))
+
+                    print("\n" + str(processo) + " >>> Designado MANUALMENTE para: " + nome_servidor)
                     break
         else:
             # Chama as Funçao de Geraçao dos Cupons
@@ -441,12 +423,11 @@ def menu_designacao(tp):
             sorteado[3] = int(sorteado[3]) + 1
             atualiza_saldo(sorteado[3], sorteado[4])  # Parametros: NOVO_SALDO, ID_SERVIDOR_GRUPO
 
-
             # Atualiza RELATORIO
             atualiza_relatorio(sorteado[0], id_grupo, processo, tp_designacao.upper())
 
             # Imprime o RESULTADO na Tela
-            print("\n" + str(processo) + " >>> *** Sorteado *** : " + str(sorteado[1]))
+            print("\n" + str(processo) + " >>> *** Sorteado *** para: " + sorteado[1])
 
         repetir = input("\nDeseja realizar outra Distribuição? (S)im / (N)ão: ")
         while (repetir.lower() != 'n'):
