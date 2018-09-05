@@ -148,7 +148,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      04/09/2018 v1.5 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.6 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -277,9 +277,9 @@ def alterar_designacao(st, nova_st):
     print("[ S ] - SAIR")
 
     if(st == 'A'):
-        id_servidor = input("\nDigite o Código do Servidor para TRANCAR a Distribuição ou [ S ] para Sair: ")
+        id_servidor = input("\nDigite o Código do Servidor para TRANCAR a Distribuição ou [S] para Sair: ")
     else:
-        id_servidor = input("\nDigite o Código do Servidor para ABRIR a Distribuição ou [ S ] para Sair: ")
+        id_servidor = input("\nDigite o Código do Servidor para ABRIR a Distribuição ou [S] para Sair: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while (id_servidor not in servidores):
@@ -354,7 +354,7 @@ def menu_designacao(tp):
     con.close()
 
     lst_manual = linha
-    servidores = []
+    servidores = ['s', 'S']
     id_servidor = 0
 
     print("\n**********Servidores com Distribuição Aberta no Grupo**********\n")
@@ -364,26 +364,39 @@ def menu_designacao(tp):
         servidores.append(str(i[0]))
 
     # Solicita que Informe o Tipo de Designação
-    tp_designacao = input("\nDigite o tipo de Distribuição [A]utomática / [M]anual ou [S]air: ")
+    tp_designacao = input("\nEscolha o tipo de Distribuição [ENTER] Automática / [M]anual ou [S]air: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
-    while (tp_designacao.lower() != 'a' and tp_designacao.lower() != 'm'):
+    # while (tp_designacao.lower() != 'a' and tp_designacao.lower() != 'm'):
+    #    menu_designacao(tp)
+    if (tp_designacao.lower() == 's'):
         menu_designacao(tp)
 
     # Se a Designacao for Manual, solicita o codigo do SERVIDOR
     if (tp_designacao.lower() == 'm'):
-        id_servidor = input("\nDigite o Código do SERVIDOR para Distribuição: ")
-        while id_servidor not in servidores:
-            menu_designacao(tp)
-    processo = input("\nDigite o número do DOCUMENTO ou dos AUTOS: ")
+        id_servidor = input("\nDigite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
 
-    if (processo == ''):
+        while id_servidor not in servidores:
+            id_servidor = input("Digite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
+            #menu_designacao(tp)
+
+        if (id_servidor == 's'):
+            menu_designacao(tp)
+
+    processo = input("\nDigite o número do DOCUMENTO/AUTOS para Distribuição: ")
+
+    #if (processo.lower() == 's'):
+    #    menu_designacao(tp)
+
+    if(processo == ''):
         processo = 'NAO INFORMADO'
 
     # Exibe tela de Confirmação
-    confirmacao = input("\nConfirmar a Distribuição (S)im / (N)ão: ")
-    while (confirmacao.lower() != 's' and tp_designacao.lower() != 'n'):
-        menu_designacao(tp)
+    confirmacao = input("\nConfirmar a Distribuição [S]im / [N]ão: ")
+
+    while (confirmacao.lower() != 's' and confirmacao.lower() != 'n'):
+        confirmacao = input("Confirmar a Distribuição [S]im / [N]ão: ")
+        #menu_designacao(tp)
 
     if (confirmacao.lower() == 'n'):
         menu_designacao(tp)
@@ -429,14 +442,22 @@ def menu_designacao(tp):
             # Imprime o RESULTADO na Tela
             print("\n" + str(processo) + " >>> *** Sorteado *** para: " + sorteado[1])
 
-        repetir = input("\nDeseja realizar outra Distribuição? (S)im / (N)ão: ")
-        while (repetir.lower() != 'n'):
-            menu_designacao(tp)
+        repetir = input("\nDeseja realizar outra Distribuição? [S]im / [N]ão: ")
 
-        if (repetir.lower() == 'n'):
+        while (repetir.lower() != 's' and repetir.lower() != 'n'):
+            repetir = input("Deseja realizar outra Distribuição? [S]im / [N]ão: ")
+
+        #while (repetir.lower() != 'n'):
+        #    menu_designacao(tp)
+
+        if (repetir.lower() == 's'):
+            menu_designacao(tp)
+        else:
             menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 # Chamada Inicial do Sistema
 menu()
+
+# lista2 = lista[:] # Para Copiar a lista em uma nova Variável
