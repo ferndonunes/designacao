@@ -148,7 +148,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.7 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.8 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -247,12 +247,12 @@ def menu_relatorio():
     limpa_tela()
     cabecalho()
 
-    print("\nTOTAL DE DISTRIBUIÇÕES POR GRUPO [ " + str(linha[0][1]) + " ]\n")
+    print("\nTOTAL DE DISTRIBUIÇÕES POR GRUPO [ " + str(linha[0][1]) + " ]\n\n")
     for i in linha:
         print(i[0] + " : "+ str(i[2]))
     con.close()
 
-    input("\nPressione [ ENTER ] para voltar ao Menu Principal.")
+    input("\n\nPressione [ ENTER ] para voltar ao Menu Principal.")
     menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -277,9 +277,9 @@ def alterar_designacao(st, nova_st):
     print("[ S ] - SAIR")
 
     if(st == 'A'):
-        id_servidor = input("\nCódigo do Servidor para TRANCAR a Distribuição: ")
+        id_servidor = input("\nCódigo do Servidor para TRANCAR a Distribuição ou [S]air: ")
     else:
-        id_servidor = input("\nCódigo do Servidor para ABRIR a Distribuição: ")
+        id_servidor = input("\nCódigo do Servidor para ABRIR a Distribuição ou [S]air: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while (id_servidor not in servidores):
@@ -296,7 +296,7 @@ def alterar_designacao(st, nova_st):
     con.commit()
     con.close()
 
-    print("\n*** DISTRIBUIÇÃO ALTERADA COM SUCESSO! ***")
+    print("\n************* Distribuição Alterada com SUCESSO! **************")
 
     repetir = input("\nDeseja realizar outra Alteração? [S]im / [N]ão: ")
     while (repetir.lower() != 'n'):
@@ -330,7 +330,7 @@ def menu_designacao(tp):
         grupos.append(str(i[0]))
     print("[ S ] - SAIR")
 
-    id_grupo = input("\nDigite o Código do GRUPO para a Distribuição: ")
+    id_grupo = input("\nDigite o Código do GRUPO para realizar a Distribuição: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while id_grupo not in grupos:
@@ -374,16 +374,16 @@ def menu_designacao(tp):
 
     # Se a Designacao for Manual, solicita o codigo do SERVIDOR
     if (tp_designacao.lower() == 'm'):
-        id_servidor = input("\nCódigo do SERVIDOR para Distribuição MANUAL ou [S]air: ")
+        id_servidor = input("\nDigite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
 
         while id_servidor not in servidores:
-            id_servidor = input("Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
+            id_servidor = input("Digite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
             #menu_designacao(tp)
 
         if (id_servidor == 's'):
             menu_designacao(tp)
 
-    processo = input("\nNúmero DOCUMENTO/AUTOS para Distribuição: ")
+    processo = input("\nInforme o DOCUMENTO/AUTOS para Distribuição: ")
 
     #if (processo.lower() == 's'):
     #    menu_designacao(tp)
@@ -420,7 +420,7 @@ def menu_designacao(tp):
                     # Imprime o Resultado da Designaçao Manual
                     print("\n************************ DISTRIBUIDO **************************")
                     print("Documento/Autos: " + str(processo) + "\n")
-                    print(nome_servidor)
+                    print(">>> " + nome_servidor)
 
                     #print("\n" + str(processo) + " Distribuido para: " + nome_servidor)
                     break
@@ -446,7 +446,7 @@ def menu_designacao(tp):
 
             print("\n************************* SORTEADO ****************************")
             print("Documento/Autos: " + str(processo)+"\n")
-            print(sorteado[1])
+            print(">>> " + sorteado[1])
 
             #print("\n" + str(processo) + " *** Sorteado *** para: " + sorteado[1])
 
