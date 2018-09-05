@@ -12,7 +12,7 @@
 @autor:         Fernando Cesar Nunes
 @contato:       fcesar@mpf.mp.br
 @organização:   Ministerio Publico Federal
-@data:          04/09/2018
+@data:          05/09/2018
 """
 
 # Importação dos Módulos Necessários
@@ -148,7 +148,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.6 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.7 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ def menu():
 def menu_relatorio():
     limpa_tela()
     cabecalho()
-    print("\n********************Grupos de Distribuição*********************\n")
+    print("\n******************* Grupos de Distribuição ********************\n")
 
     con = sqlite3.connect('designacao.db')
     sql = "SELECT id_grupo, nome_grupo " \
@@ -261,7 +261,7 @@ def menu_relatorio():
 def alterar_designacao(st, nova_st):
     limpa_tela()
     cabecalho()
-    print("\n*************Servidores para Alterar Distribuição**************\n")
+    print("\n************ Servidores para Alterar Distribuição *************\n")
     con = sqlite3.connect('designacao.db')
     sql = "SELECT id_servidor, nome_servidor " \
           "FROM servidores " \
@@ -277,9 +277,9 @@ def alterar_designacao(st, nova_st):
     print("[ S ] - SAIR")
 
     if(st == 'A'):
-        id_servidor = input("\nDigite o Código do Servidor para TRANCAR a Distribuição ou [S] para Sair: ")
+        id_servidor = input("\nCódigo do Servidor para TRANCAR a Distribuição: ")
     else:
-        id_servidor = input("\nDigite o Código do Servidor para ABRIR a Distribuição ou [S] para Sair: ")
+        id_servidor = input("\nCódigo do Servidor para ABRIR a Distribuição: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while (id_servidor not in servidores):
@@ -298,7 +298,7 @@ def alterar_designacao(st, nova_st):
 
     print("\n*** DISTRIBUIÇÃO ALTERADA COM SUCESSO! ***")
 
-    repetir = input("\nDeseja realizar outra Alteração? (S)im / (N)ão: ")
+    repetir = input("\nDeseja realizar outra Alteração? [S]im / [N]ão: ")
     while (repetir.lower() != 'n'):
         alterar_designacao(st, nova_st)
 
@@ -313,7 +313,7 @@ def menu_designacao(tp):
     cabecalho()
 
     # Lista GRUPOS Ativos e as Opçoes
-    print("\n********************Grupos de Distribuição*********************\n")
+    print("\n******************* Grupos de Distribuição ********************\n")
     con = sqlite3.connect('designacao.db')
     sql = "SELECT id_grupo, nome_grupo " \
           "FROM grupos " \
@@ -330,7 +330,7 @@ def menu_designacao(tp):
         grupos.append(str(i[0]))
     print("[ S ] - SAIR")
 
-    id_grupo = input("\nDigite o Código do GRUPO para a Distribuição ou [S] para Sair: ")
+    id_grupo = input("\nDigite o Código do GRUPO para a Distribuição: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while id_grupo not in grupos:
@@ -357,14 +357,14 @@ def menu_designacao(tp):
     servidores = ['s', 'S']
     id_servidor = 0
 
-    print("\n**********Servidores com Distribuição Aberta no Grupo**********\n")
+    print("\n********* Servidores com Distribuição Aberta no Grupo *********\n")
 
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - "+ str(i[1]))
         servidores.append(str(i[0]))
 
     # Solicita que Informe o Tipo de Designação
-    tp_designacao = input("\nEscolha o tipo de Distribuição [ENTER] Automática / [M]anual ou [S]air: ")
+    tp_designacao = input("\nTipo Distribuição [ENTER] Automática / [M]anual / [S]air: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     # while (tp_designacao.lower() != 'a' and tp_designacao.lower() != 'm'):
@@ -374,16 +374,16 @@ def menu_designacao(tp):
 
     # Se a Designacao for Manual, solicita o codigo do SERVIDOR
     if (tp_designacao.lower() == 'm'):
-        id_servidor = input("\nDigite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
+        id_servidor = input("\nCódigo do SERVIDOR para Distribuição MANUAL ou [S]air: ")
 
         while id_servidor not in servidores:
-            id_servidor = input("Digite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
+            id_servidor = input("Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
             #menu_designacao(tp)
 
         if (id_servidor == 's'):
             menu_designacao(tp)
 
-    processo = input("\nDigite o número do DOCUMENTO/AUTOS para Distribuição: ")
+    processo = input("\nNúmero DOCUMENTO/AUTOS para Distribuição: ")
 
     #if (processo.lower() == 's'):
     #    menu_designacao(tp)
@@ -392,10 +392,10 @@ def menu_designacao(tp):
         processo = 'NAO INFORMADO'
 
     # Exibe tela de Confirmação
-    confirmacao = input("\nConfirmar a Distribuição [S]im / [N]ão: ")
+    confirmacao = input("\nConfirmar Distribuição [S]im / [N]ão: ")
 
     while (confirmacao.lower() != 's' and confirmacao.lower() != 'n'):
-        confirmacao = input("Confirmar a Distribuição [S]im / [N]ão: ")
+        confirmacao = input("Confirmar Distribuição [S]im / [N]ão: ")
         #menu_designacao(tp)
 
     if (confirmacao.lower() == 'n'):
@@ -418,8 +418,11 @@ def menu_designacao(tp):
                     atualiza_relatorio(i[0], id_grupo, processo, tp_designacao.upper())
 
                     # Imprime o Resultado da Designaçao Manual
+                    print("\n************************ DISTRIBUIDO **************************")
+                    print("Documento/Autos: " + str(processo) + "\n")
+                    print(nome_servidor)
 
-                    print("\n" + str(processo) + " >>> Designado MANUALMENTE para: " + nome_servidor)
+                    #print("\n" + str(processo) + " Distribuido para: " + nome_servidor)
                     break
         else:
             # Chama as Funçao de Geraçao dos Cupons
@@ -440,7 +443,12 @@ def menu_designacao(tp):
             atualiza_relatorio(sorteado[0], id_grupo, processo, tp_designacao.upper())
 
             # Imprime o RESULTADO na Tela
-            print("\n" + str(processo) + " >>> *** Sorteado *** para: " + sorteado[1])
+
+            print("\n************************* SORTEADO ****************************")
+            print("Documento/Autos: " + str(processo)+"\n")
+            print(sorteado[1])
+
+            #print("\n" + str(processo) + " *** Sorteado *** para: " + sorteado[1])
 
         repetir = input("\nDeseja realizar outra Distribuição? [S]im / [N]ão: ")
 
