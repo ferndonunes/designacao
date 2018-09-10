@@ -148,7 +148,7 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      05/09/2018 v1.8 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      10/09/2018 v1.9 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -157,18 +157,19 @@ def cabecalho():
 def menu():
     limpa_tela()
     cabecalho()
-    print("\n MENU PRINCIPAL \n")
+    print("\n MENU PRINCIPAL\n")
     print("[ 1 ] - DISTRIBUIR JUDICIAL")
     print("[ 2 ] - DISTRIBUIR EXTRAJUDICIAL")
     print("[ 3 ] - DISTRIBUIR DOCUMENTO")
     print("[ 4 ] - TRANCAR DISTRIBUIÇÃO")
     print("[ 5 ] - ABRIR DISTRIBUIÇÃO")
-    print("[ 6 ] - RELATÓRIO")
+    print("[ 6 ] - RELATÓRIOS")
+    print("[ 7 ] - REDISTRIBUIR")
     print("[ S ] - SAIR")
 
     # Carrega o Menu enquanto nao Escolher uma Opçao Valida
-    opcoes = ['1','2','3','4','5','6','s','S']
-    escolha = input("\nEscolha sua Opção [1/2/3/4/5/6] ou [S] para Sair: ")
+    opcoes = ['1','2','3','4','5','6','7','s','S']
+    escolha = input("\nEscolha sua Opção [1/2/3/4/5/6/7] ou [S]air: ")
     while str(escolha.lower()) not in opcoes:
         menu()
 
@@ -193,12 +194,15 @@ def menu():
         alterar_designacao('B', 'A')
 
     elif escolha == '6':
-        # RELATORIO
+        # RELATORIOS
         menu_relatorio()
+
+    elif escolha == '7':
+        # REDISTRIBUICAO
+        menu_redistribuicao()
 
     elif escolha.lower() == 's':
         # SAIR
-        limpa_tela()
         exit()
 
 # ---------------------------------------------------------------------------------------------------------------------4
@@ -207,6 +211,7 @@ def menu():
 def menu_relatorio():
     limpa_tela()
     cabecalho()
+    print("\n MENU RELATÓRIOS")
     print("\n******************* Grupos de Distribuição ********************\n")
 
     con = sqlite3.connect('designacao.db')
@@ -215,11 +220,12 @@ def menu_relatorio():
     c = con.cursor()
     c.execute(sql)
     linha = c.fetchall()
+    con.close()
+
     grupos = ['s', 'S']
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
         grupos.append(str(i[0]))
-    con.close()
     print("[ S ] - SAIR")
 
     id_grupo = input("\nDigite o Código do GRUPO para Visualizar o RELATÓRIO: ")
@@ -243,17 +249,131 @@ def menu_relatorio():
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
+    con.close()
 
     limpa_tela()
     cabecalho()
+    print("\n MENU RELATÓRIOS")
+    print("\n************** Total de Distribuições por Grupo ***************\n")
 
-    print("\nTOTAL DE DISTRIBUIÇÕES POR GRUPO [ " + str(linha[0][1]) + " ]\n\n")
     for i in linha:
         print(i[0] + " : "+ str(i[2]))
+
+    repetir = input("\nDeseja gerar outro Relatório? [ENTER] Sim / [N]ão: ")
+    while (repetir.lower() != 'n'):
+        menu_relatorio()
+
+    if (repetir.lower() == 'n'):
+        menu()
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Compensa o Saldo Quando Redistribui para outro Servidor
+def menu_redistribuicao():
+
+    limpa_tela()
+    cabecalho()
+    print("\n MENU REDISTRIBUIR")
+
+    print("\n********** Servidores Ativos e Inativos do Gabinete ***********\n")
+
+    con = sqlite3.connect('designacao.db')
+    sql = "SELECT id_servidor, nome_servidor " \
+          "FROM servidores "
+
+    c = con.cursor()
+    c.execute(sql)
+    linha = c.fetchall()
+    con.close()
+    servidores = ['s', 'S']
+
+    for i in linha:
+        print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
+        servidores.append(str(i[0]))
+    print("[ S ] - SAIR")
+
+    id_servidor = input("\nCódigo do SERVIDOR para Diminuição do Saldo ou [S]air: ")
+
+    # Carrega o Menu ate a escolha de uma Opçao Valida
+    while (id_servidor not in servidores):
+        menu_redistribuicao()
+
+    if (id_servidor.lower() == 's'):
+        menu()
+
+    # Seleciona Grupos dos quais o Servidor Participa
+    con = sqlite3.connect('designacao.db')
+    sql = "SELECT id_servidor_grupo, nome_grupo, saldo_servidor_grupo  " \
+          "FROM servidores_grupos, grupos " \
+          "WHERE id_grupo == id_grupo_servidor_grupo " \
+          "AND st_grupo == 'A'" \
+          "AND id_servidor_servidor_grupo = ?"
+
+    c = con.cursor()
+    c.execute(sql, str(id_servidor))
+    linha = c.fetchall()
+    con.close()
+    grupos = ['s', 'S']
+
+    print("\n************ Grupos nos quais o Servidor Participa ************\n")
+
+    for i in linha:
+        print("[ " + str(i[0]) + " ]" + " - " + str(i[1]))
+        grupos.append(str(i[0]))
+    print("[ S ] - SAIR")
+
+    id_grupo = input("\nCódigo do GRUPO para Diminuição do Saldo ou [S]air: ")
+
+    # Carrega o Menu ate a escolha de uma Opçao Valida
+    while (id_grupo not in grupos):
+        menu_redistribuicao()
+
+    if (id_grupo.lower() == 's'):
+        menu_redistribuicao()
+
+    qt_processos = input("\nNúmero de Processos REDISTRIBUÍDOS ou [S]air: ")
+
+    while (not qt_processos.isnumeric()):
+        if (qt_processos.lower() == 's'):
+            menu()
+            break
+        qt_processos = input("\nNúmero de Processos que foram REDISTRIBUÍDOS ou [S]air: ")
+
+
+    # Busca o Saldo Atual do Grupo Escolhido
+    con = sqlite3.connect('designacao.db')
+    sql = "SELECT saldo_servidor_grupo " \
+          "FROM servidores_grupos " \
+          "WHERE id_servidor_grupo == ?"
+    c = con.cursor()
+    c.execute(sql, str(id_grupo))
+    linha = c.fetchall()
+    con.close()
+    saldo_atual = int(linha[0][0])
+
+
+    # Calcula o Novo Saldo
+    novo_saldo = saldo_atual - int(qt_processos)
+
+
+    # Altera o Saldo do Servidor no Grupo
+    con = sqlite3.connect('designacao.db')
+    sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
+    c = con.cursor()
+    c.execute(sql, (str(novo_saldo), str(id_grupo)))
+    con.commit()
     con.close()
 
-    input("\n\nPressione [ ENTER ] para voltar ao Menu Principal.")
-    menu()
+    print("\n\n**************** Saldo Alterado com SUCESSO! ******************\n")
+    print("AVISO: Para equilibrar a distribuição, DISTRIBUIR os processos\n")
+    print("  de forma MANUAL ao servidor que recebeu os redistribuídos.\n")
+
+    repetir = input("\nDeseja realizar outra Redistribuição? [ENTER] Sim / [N]ão: ")
+    while (repetir.lower() != 'n'):
+        menu_redistribuicao()
+
+    if (repetir.lower() == 'n'):
+        menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -261,6 +381,14 @@ def menu_relatorio():
 def alterar_designacao(st, nova_st):
     limpa_tela()
     cabecalho()
+
+    if(st.upper() == 'A'):
+        print("\n MENU TRANCAR DISTRIBUIÇÃO")
+        msg = "TRANCAR"
+    else:
+        print("\n MENU ABRIR DISTRIBUIÇÃO")
+        msg = "ABRIR"
+
     print("\n************ Servidores para Alterar Distribuição *************\n")
     con = sqlite3.connect('designacao.db')
     sql = "SELECT id_servidor, nome_servidor " \
@@ -276,7 +404,7 @@ def alterar_designacao(st, nova_st):
     con.close()
     print("[ S ] - SAIR")
 
-    if(st == 'A'):
+    if(st.upper() == 'A'):
         id_servidor = input("\nCódigo do Servidor para TRANCAR a Distribuição ou [S]air: ")
     else:
         id_servidor = input("\nCódigo do Servidor para ABRIR a Distribuição ou [S]air: ")
@@ -298,7 +426,7 @@ def alterar_designacao(st, nova_st):
 
     print("\n************* Distribuição Alterada com SUCESSO! **************")
 
-    repetir = input("\nDeseja realizar outra Alteração? [S]im / [N]ão: ")
+    repetir = input("\nDeseja " + msg + " outra Distribuição? [ENTER] Sim / [N]ão: ")
     while (repetir.lower() != 'n'):
         alterar_designacao(st, nova_st)
 
@@ -311,6 +439,7 @@ def alterar_designacao(st, nova_st):
 def menu_designacao(tp):
     limpa_tela()
     cabecalho()
+    print("\n MENU DISTRIBUIÇÃO")
 
     # Lista GRUPOS Ativos e as Opçoes
     print("\n******************* Grupos de Distribuição ********************\n")
@@ -330,7 +459,7 @@ def menu_designacao(tp):
         grupos.append(str(i[0]))
     print("[ S ] - SAIR")
 
-    id_grupo = input("\nDigite o Código do GRUPO para realizar a Distribuição: ")
+    id_grupo = input("\nEscolha o GRUPO para realizar a Distribuição ou [S]air: ")
 
     # Carrega o Menu ate a escolha de uma Opçao Valida
     while id_grupo not in grupos:
@@ -380,7 +509,7 @@ def menu_designacao(tp):
             id_servidor = input("Digite o Código do SERVIDOR para Distribuição MANUAL ou [S]air: ")
             #menu_designacao(tp)
 
-        if (id_servidor == 's'):
+        if (id_servidor.lower() == 's'):
             menu_designacao(tp)
 
     processo = input("\nInforme o DOCUMENTO/AUTOS para Distribuição: ")
@@ -419,7 +548,7 @@ def menu_designacao(tp):
 
                     # Imprime o Resultado da Designaçao Manual
                     print("\n************************ DISTRIBUIDO **************************")
-                    print("Documento/Autos: " + str(processo) + "\n")
+                    print("\nDocumento/Autos: " + str(processo) + "\n")
                     print(">>> " + nome_servidor)
 
                     #print("\n" + str(processo) + " Distribuido para: " + nome_servidor)
@@ -450,17 +579,11 @@ def menu_designacao(tp):
 
             #print("\n" + str(processo) + " *** Sorteado *** para: " + sorteado[1])
 
-        repetir = input("\nDeseja realizar outra Distribuição? [S]im / [N]ão: ")
-
-        while (repetir.lower() != 's' and repetir.lower() != 'n'):
-            repetir = input("Deseja realizar outra Distribuição? [S]im / [N]ão: ")
-
-        #while (repetir.lower() != 'n'):
-        #    menu_designacao(tp)
-
-        if (repetir.lower() == 's'):
+        repetir = input("\nDeseja realizar outra Distribuição? [ENTER] Sim / [N]ão: ")
+        while (repetir.lower() != 'n'):
             menu_designacao(tp)
-        else:
+
+        if (repetir.lower() == 'n'):
             menu()
 
 # ---------------------------------------------------------------------------------------------------------------------

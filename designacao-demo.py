@@ -150,7 +150,7 @@ def exibe_saldo():
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    04/09/2018 v1.5 *")
+    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    10/09/2018 v1.9 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ while opcao.lower() != 's':
     atualiza_saldo(sorteado[3], sorteado[4]) # Parametros: NOVO_SALDO, ID_SERVIDOR_GRUPO
 
     cabecalho()
-
+    print("\n" + str(sorteio))
     print("\n>>> *** Sorteado *** <<<: " + sorteado[1] + "\n")
 
     exibe_saldo()
