@@ -22,6 +22,14 @@ import sqlite3
 import datetime
 
 
+# Funçao que monta o Cabeçalho
+def cabecalho():
+    print("\n***************************************************************")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      11/09/2018 v2.0 *")
+    print("\n***************************************************************")
+
+# ---------------------------------------------------------------------------------------------------------------------
+
 # Funçao que Limpa a Tela do Sistema
 def limpa_tela():
     if os.name == 'posix':
@@ -39,13 +47,12 @@ def cupons(id_grupo):
     sql = "SELECT id_servidor, nome_servidor, peso_servidor_grupo, saldo_servidor_grupo, id_servidor_grupo, " \
           "id_grupo_servidor_grupo " \
           "FROM servidores, servidores_grupos " \
-          "WHERE st_servidor = 'A' AND id_servidor = id_servidor_grupo AND id_grupo_servidor_grupo == ?"
+          "WHERE st_servidor == 'A' AND id_servidor == id_servidor_servidor_grupo AND id_grupo_servidor_grupo == ?"
 
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
     con.close()
-
     lista = []
 
     # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
@@ -61,11 +68,45 @@ def cupons(id_grupo):
         participa = 0
         nao_participa = 0
 
+        # Se tiver so 1 Habilitado, Participa do Sorteio e Nao Altera o Saldo
+        if (len(linha) == 1):
+            mantem_saldo = list(i)
+            mantem_saldo[3] = int(mantem_saldo[3] - 1)
+            lista.append(mantem_saldo)
+            return lista
+
         # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < intervalo and peso_atual == 1):
-            lista.append(list(i))
+        if (saldo_atual < intervalo and peso_atual == 1 and len(linha) > 1):
+
+            # Contador de Número de Servidores Peso 1
+            qtde_peso1 = 0
+
+            # Compara os Saldos dos Servidores de Peso 1
+            for y in linha:
+                id_y = y[0]
+                peso_y = int(y[2])
+                saldo_y = int(y[3])
+                diferenca = int(saldo_atual - saldo_y)
+
+                # Compara o Saldo com os Demais Servidores com o mesmo Peso
+                if((id_i != id_y) and (peso_y == 1)):
+
+                    qtde_peso1 = 1
+
+                    # Participa se a Diferença de Processos for Menor que o Intervalo
+                    if(diferenca < intervalo):
+                        participa += 1
+                    else:
+                        nao_participa += 1
+
+            if (qtde_peso1 == 0):
+                participa +=1
+
         # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
-        elif (saldo_atual < saldo_max and peso_atual == 2):
+        elif (saldo_atual < saldo_max and peso_atual == 2 and len(linha) > 1):
+
+            # Contador de Número de Servidores Peso 2
+            qtde_peso2 = 0
 
             # Compara os Saldos dos Servidores de Peso 2
             for x in linha:
@@ -74,17 +115,25 @@ def cupons(id_grupo):
                 saldo_x = int(x[3])
                 diferenca = int(saldo_atual - saldo_x)
 
+
                 # Compara o Saldo com os Demais Servidores com o mesmo Peso
                 if((id_i != id_x) and (peso_x == 2)):
+
+                    qtde_peso2 = 1
 
                     # Participa se a Diferença de Processos for Menor que o Intervalo
                     if(diferenca < intervalo):
                         participa += 1
                     else:
                         nao_participa += 1
-        # Se o Total de Vezes que Participa for Maior, entra no Sorteio
+
+            if (qtde_peso2 == 0):
+                participa +=1
+
+        # Se o Total de Vezes que Participa for Maior entra no Sorteio
         if (participa > nao_participa):
-                lista.append(list(i))
+            lista.append(list(i))
+
     #print("\nParticipantes: " + str(lista))
     return lista
 
@@ -107,7 +156,8 @@ def zera_saldo(id_grupo):
 
     # Calcula os Saldos dos Servidores
     con = sqlite3.connect('designacao.db')
-    sql = "SELECT id_servidor_grupo, saldo_servidor_grupo FROM servidores_grupos WHERE id_grupo_servidor_grupo == ? "
+    sql = "SELECT id_servidor_grupo, saldo_servidor_grupo, peso_servidor_grupo FROM servidores_grupos " \
+          "WHERE id_grupo_servidor_grupo == ? "
     c = con.cursor()
     c.execute(sql, str(id_grupo))
     linha = c.fetchall()
@@ -117,10 +167,15 @@ def zera_saldo(id_grupo):
     for i in linha:
         id_servidor_grupo = i[0]
         saldo = int(i[1])
-        if (saldo > saldo_max):
+        peso = int(i[2])
+
+        if (saldo > saldo_max and peso == 2):
             novo_saldo = saldo - saldo_max
+        elif (saldo > (saldo_max // 2) and peso == 1):
+            novo_saldo = saldo - (saldo_max // 2)
         else:
             novo_saldo = 0
+
         sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
         c_update = con.cursor()
         c_update.execute(sql, (str(novo_saldo), str(id_servidor_grupo)))
@@ -144,14 +199,6 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
 
 # ----------------------------------------------CODIGO DAS TELAS-------------------------------------------------------
 
-
-# Funçao que monta o Cabeçalho
-def cabecalho():
-    print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      10/09/2018 v1.9 *")
-    print("\n***************************************************************")
-
-# ---------------------------------------------------------------------------------------------------------------------
 
 # Funçao que monta a Tela Inicial
 def menu():
