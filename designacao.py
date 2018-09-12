@@ -1,5 +1,5 @@
-#!usr/bin/python
-# -*- mode python; -*-
+#!usr/bin/python3
+# -*- mode python; coding: utf-8 -*-
 #
 # Sistema para Designação Automática de Autos Judiciais e Extrajudiciais
 # Entrada: Número do Processo
@@ -25,7 +25,7 @@ import datetime
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      11/09/2018 v2.0 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      12/09/2018 v2.1 *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ def menu_redistribuicao():
           "FROM servidores_grupos, grupos " \
           "WHERE id_grupo == id_grupo_servidor_grupo " \
           "AND st_grupo == 'A'" \
-          "AND id_servidor_servidor_grupo = ?"
+          "AND id_servidor_servidor_grupo == ?"
 
     c = con.cursor()
     c.execute(sql, str(id_servidor))
@@ -391,9 +391,9 @@ def menu_redistribuicao():
     con = sqlite3.connect('designacao.db')
     sql = "SELECT saldo_servidor_grupo " \
           "FROM servidores_grupos " \
-          "WHERE id_servidor_grupo == ?"
+          "WHERE id_servidor_grupo == " + str(id_grupo)
     c = con.cursor()
-    c.execute(sql, str(id_grupo))
+    c.execute(sql)
     linha = c.fetchall()
     con.close()
     saldo_atual = int(linha[0][0])

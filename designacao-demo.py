@@ -1,5 +1,5 @@
-#!usr/bin/python
-# -*- mode python; -*-
+#!usr/bin/python3
+# -*- mode python; coding: utf-8 -*-
 #
 # Sistema para Designação Automática de Autos Judiciais e Extrajudiciais
 # Entrada: Número do Processo
@@ -28,7 +28,6 @@ def cabecalho():
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
-
 
 # Funçao que Limpa a Tela do Sistema
 def limpa_tela():
@@ -68,7 +67,6 @@ def cupons(id_grupo):
         participa = 0
         nao_participa = 0
 
-
         # Se tiver so um Habilitado, Participa do Sorteio e Nao Altera o Saldo
         if (len(linha) == 1):
             mantem_saldo = list(i)
@@ -88,7 +86,6 @@ def cupons(id_grupo):
                 peso_y = int(y[2])
                 saldo_y = int(y[3])
                 diferenca = int(saldo_atual - saldo_y)
-
 
                 # Compara o Saldo com os Demais Servidores com o mesmo Peso
                 if((id_i != id_y) and (peso_y == 1)):
@@ -118,7 +115,6 @@ def cupons(id_grupo):
                 saldo_x = int(x[3])
                 diferenca = int(saldo_atual - saldo_x)
 
-
                 # Compara o Saldo com os Demais Servidores com o mesmo Peso
                 if((id_i != id_x) and (peso_x == 2)):
 
@@ -130,10 +126,8 @@ def cupons(id_grupo):
                     else:
                         nao_participa += 1
 
-
             if (qtde_peso2 == 0):
                 participa +=1
-
 
         # Se o Total de Vezes que Participa for Maior entra no Sorteio
         if (participa > nao_participa):
