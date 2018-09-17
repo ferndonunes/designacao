@@ -20,11 +20,14 @@ import os
 import random
 import sqlite3
 
+# Variaveis Globais
+versao    = 'v2.1'
+data      = '13/09/2018'
 
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                    DESIGNAÇÃO AUTOMÁTICA    11/09/2018 v2.0 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      " + data + " " + versao + " *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -53,6 +56,9 @@ def cupons(id_grupo):
     linha = c.fetchall()
     lista = []
     con.close()
+
+    print(linha)
+
 
     # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
     intervalo = 2

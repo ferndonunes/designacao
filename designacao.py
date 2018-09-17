@@ -22,10 +22,17 @@ import sqlite3
 import datetime
 
 
+# Variaveis Globais
+versao    = 'v2.2'
+data      = '17/09/2018'
+banco     = 'designacao.db'
+saldo_max = 4 # Intervalo = saldo_max // 2
+
+
 # Funçao que monta o Cabeçalho
 def cabecalho():
     print("\n***************************************************************")
-    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      12/09/2018 v2.1 *")
+    print("\n*                  DESIGNAÇÃO AUTOMÁTICA      " + data + " " + versao + " *")
     print("\n***************************************************************")
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -42,7 +49,7 @@ def limpa_tela():
 def cupons(id_grupo):
 
     # Busca os Servidores por Grupo para Gerar os Cupons
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
 
     sql = "SELECT id_servidor, nome_servidor, peso_servidor_grupo, saldo_servidor_grupo, id_servidor_grupo, " \
           "id_grupo_servidor_grupo " \
@@ -54,10 +61,6 @@ def cupons(id_grupo):
     linha = c.fetchall()
     con.close()
     lista = []
-
-    # Diferença Maxima de Processos entre os Servidores e Saldo Maximo antes de Zerar Contadores
-    intervalo = 2
-    saldo_max = 4
 
     # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
     #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
@@ -76,7 +79,7 @@ def cupons(id_grupo):
             return lista
 
         # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < intervalo and peso_atual == 1 and len(linha) > 1):
+        if (saldo_atual < int(saldo_max // 2) and peso_atual == 1 and len(linha) > 1):
 
             # Contador de Número de Servidores Peso 1
             qtde_peso1 = 0
@@ -94,7 +97,7 @@ def cupons(id_grupo):
                     qtde_peso1 = 1
 
                     # Participa se a Diferença de Processos for Menor que o Intervalo
-                    if(diferenca < intervalo):
+                    if(diferenca < int(saldo_max // 2)):
                         participa += 1
                     else:
                         nao_participa += 1
@@ -122,7 +125,7 @@ def cupons(id_grupo):
                     qtde_peso2 = 1
 
                     # Participa se a Diferença de Processos for Menor que o Intervalo
-                    if(diferenca < intervalo):
+                    if(diferenca < int(saldo_max // 2)):
                         participa += 1
                     else:
                         nao_participa += 1
@@ -140,7 +143,7 @@ def cupons(id_grupo):
 
 # Atualiza o Saldo do Servidor no Grupo
 def atualiza_saldo(novo_saldo, id_servidor_grupo):
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
     c = con.cursor()
     c.execute(sql, (str(novo_saldo), str(id_servidor_grupo)))
@@ -151,11 +154,8 @@ def atualiza_saldo(novo_saldo, id_servidor_grupo):
 # Zera os Saldos dos Servidores no Grupo
 def zera_saldo(id_grupo):
 
-    # Saldo Máximo por Servidor
-    saldo_max = 4
-
     # Calcula os Saldos dos Servidores
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor_grupo, saldo_servidor_grupo, peso_servidor_grupo FROM servidores_grupos " \
           "WHERE id_grupo_servidor_grupo == ? "
     c = con.cursor()
@@ -187,7 +187,7 @@ def zera_saldo(id_grupo):
 # Funçao que Insere as Designaçoes no Relatorio
 def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
     hoje = datetime.datetime.now()
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "INSERT INTO relatorios " \
           "(id_servidor_relatorio, id_grupo_relatorio, processo_relatorio, dt_relatorio, tp_designacao_relatorio) " \
           "VALUES (?,?,?,?,?)"
@@ -261,7 +261,7 @@ def menu_relatorio():
     print("\n MENU RELATÓRIOS")
     print("\n******************* Grupos de Distribuição ********************\n")
 
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_grupo, nome_grupo " \
           "FROM grupos "
     c = con.cursor()
@@ -286,7 +286,7 @@ def menu_relatorio():
         menu()
 
     # Gera o Relatorio
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT nome_servidor as NOME, nome_grupo as GRUPO, " \
           "COUNT(id_relatorio) as TOTAL " \
           "FROM servidores, grupos, relatorios " \
@@ -324,7 +324,7 @@ def menu_redistribuicao():
 
     print("\n********** Servidores Ativos e Inativos do Gabinete ***********\n")
 
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor, nome_servidor " \
           "FROM servidores "
 
@@ -349,7 +349,7 @@ def menu_redistribuicao():
         menu()
 
     # Seleciona Grupos dos quais o Servidor Participa
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor_grupo, nome_grupo, saldo_servidor_grupo  " \
           "FROM servidores_grupos, grupos " \
           "WHERE id_grupo == id_grupo_servidor_grupo " \
@@ -388,7 +388,7 @@ def menu_redistribuicao():
 
 
     # Busca o Saldo Atual do Grupo Escolhido
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT saldo_servidor_grupo " \
           "FROM servidores_grupos " \
           "WHERE id_servidor_grupo == " + str(id_grupo)
@@ -404,7 +404,7 @@ def menu_redistribuicao():
 
 
     # Altera o Saldo do Servidor no Grupo
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
     c = con.cursor()
     c.execute(sql, (str(novo_saldo), str(id_grupo)))
@@ -437,7 +437,7 @@ def alterar_designacao(st, nova_st):
         msg = "ABRIR"
 
     print("\n************ Servidores para Alterar Distribuição *************\n")
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor, nome_servidor " \
           "FROM servidores " \
           "WHERE st_servidor == ?"
@@ -464,7 +464,7 @@ def alterar_designacao(st, nova_st):
         menu()
 
     # Altera o Status do Servidor
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "UPDATE servidores SET st_servidor == ? WHERE id_servidor == ?"
     c = con.cursor()
     c.execute(sql, (str(nova_st), str(id_servidor)))
@@ -490,7 +490,7 @@ def menu_designacao(tp):
 
     # Lista GRUPOS Ativos e as Opçoes
     print("\n******************* Grupos de Distribuição ********************\n")
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_grupo, nome_grupo " \
           "FROM grupos " \
           "WHERE tp_grupo == ? " \
@@ -517,7 +517,7 @@ def menu_designacao(tp):
         menu()
 
     # Lista SERVIDORES Ativos no Grupo escolhido
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor, nome_servidor, id_servidor_grupo, saldo_servidor_grupo " \
           "FROM servidores, servidores_grupos " \
           "WHERE st_servidor == 'A' " \
