@@ -27,8 +27,8 @@ import sqlite3
 
 
 saldo_max = 4
-versao    = 'v2.1'
-data      = '13/09/2018'
+versao    = 'v3.0'
+data      = '18/09/2018'
 banco     = 'designacao.db'
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ def limpa_tela():
 def zera_saldo(id_grupo):
 
     # Calcula os Saldos dos Servidores
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor_grupo, saldo_servidor_grupo, peso_servidor_grupo FROM servidores_grupos " \
           "WHERE id_grupo_servidor_grupo == ? "
     c = con.cursor()
@@ -66,8 +66,8 @@ def zera_saldo(id_grupo):
 
         if (saldo > saldo_max and peso == 2):
             novo_saldo = saldo - saldo_max
-        elif (saldo > (saldo_max // 2) and peso == 1):
-            novo_saldo = saldo - (saldo_max // 2)
+        elif (saldo > int((saldo_max // 2)) and peso == 1):
+            novo_saldo = saldo - int((saldo_max // 2))
         else:
             novo_saldo = 0
 
@@ -80,15 +80,16 @@ def zera_saldo(id_grupo):
 
 # Atualiza o Saldo do Servidor no Grupo
 def atualiza_saldo(novo_saldo, id_servidor_grupo):
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "UPDATE servidores_grupos SET saldo_servidor_grupo == ? WHERE id_servidor_grupo == ?"
     c = con.cursor()
     c.execute(sql, (str(novo_saldo), str(id_servidor_grupo)))
     con.commit()
     con.close()
 
+# Exibe Resultado com os Saldos
 def exibe_saldo():
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT nome_servidor as NOME, saldo_servidor_grupo as SALDO " \
           "FROM servidores, servidores_grupos " \
           "WHERE id_servidor == id_servidor_servidor_grupo " \
@@ -102,51 +103,57 @@ def exibe_saldo():
         print(i[0] + " : "+ str(i[1]))
 
 
+
 # ---------------------------------------------------------------------------------------------------------------------
 
+
+# Se tiver somente um, Participa da Distribuicao
 def verificaUm(linha):
     if len(linha) == 1:
         return True
 
 
-
-
+# Mantem o Saldo quando somente um Participa
 def mantemSaldo(linha):
     mantem_saldo = list(linha[0])
-    print(mantem_saldo)
-
     mantem_saldo[3] = int(mantem_saldo[3] - 1)
     return mantem_saldo
 
 
-
-
-def comparaSaldo(linha, id, saldo_atual, peso_atual):
-    for i in linha:
-        id_linha    = i[0]
-        peso_linha  = i[2]
-        saldo_linha = int(i[3])
-        # Verifica se a Diferença Entre os Cplegas de Mesmo Peso e Menor que o Intervalo
-        if (id != id_linha and peso_atual == peso_linha):
-            if (int((saldo_atual - saldo_linha)) < int(saldo_max // 2)):
-                return True
-            else:
-                return False
-
-
-
-
+# Verifica se esta dentro dos Limites do Saldo Maximo por peso
 def verificaLimites(saldo_atual, peso_atual):
-    if (int(saldo_atual) <  int(saldo_max // 2) and peso_atual == 1):
+    if (int(saldo_atual) < int(saldo_max // 2) and peso_atual == 1):
         return True
-    elif (int(saldo_atual) <  int(saldo_max) and peso_atual == 2):
+    elif (int(saldo_atual) < int(saldo_max) and peso_atual == 2):
         return True
     else:
         return False
 
 
+# Se a Diferenca do Saldo for Maior que o Intervalo, Participa
+def comparaSaldo(linha, id, saldo_atual, peso_atual):
+    for i in linha:
+        id_linha    = i[0]
+        peso_linha  = i[2]
+        saldo_linha = int(i[3])
+
+        # Verifica se a Diferença Entre os Colegas de Mesmo Peso e Menor que o Intervalo
+        if (id != id_linha and peso_atual == peso_linha):
+            if (int((saldo_atual - saldo_linha)) >= int(saldo_max // 2)):
+                return False
+
+        # Nao Participa se o Saldo for Positivo e tiver Alguem com Saldo Negativo
+        if (int(saldo_atual) >= 0 and int(saldo_linha) < 0):
+            return False
+
+        # Nao Participa se tiver Alguem com Saldo Negativo Maior que a Diferenca
+        if (int(saldo_atual) < 0 and int(saldo_linha) < 0):
+            if (int(abs(saldo_linha) - abs(saldo_atual)) >= int(saldo_max // 2)):
+                return False
+    return True
 
 
+# Compara diferenca em Saldos Negativos
 def comparaSaldoNegativo(linha, id, saldo_atual):
     s = 0
     n = 0
@@ -155,14 +162,17 @@ def comparaSaldoNegativo(linha, id, saldo_atual):
         saldo_linha = int(i[3])
 
         if (id != id_linha):
-            # Nao Participa se tiver Alguem com Saldo Negativo
-            if (int(saldo_atual) >= 0 and int(saldo_linha) < 0):
-                return False
+
             # Participa de os Dois forem Negativos com Diferença Menor que o Intervalo
-            elif (int(saldo_atual) < 0 and int((saldo_atual - saldo_linha)) < int(saldo_max // 2)):
-                s += 1
-            else:
-                n += 1
+            if (int(saldo_atual) < 0 and int(saldo_linha) < 0):
+
+                if(int(saldo_atual) < int(saldo_linha)):
+                    if (int(abs(saldo_atual) - abs(saldo_linha)) >= int(saldo_max // 2)):
+                        s += 1
+                    else:
+                        n += 1
+                else:
+                    n += 1
     if (s > n):
         return True
     else:
@@ -170,28 +180,14 @@ def comparaSaldoNegativo(linha, id, saldo_atual):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# ---------------------------------------------------------------------------------------------------------------------
 
 
 
 def cupons(id_grupo):
 
     # Busca os Servidores por Grupo para Gerar os Cupons
-    con = sqlite3.connect('designacao.db')
+    con = sqlite3.connect(banco)
     sql = "SELECT id_servidor, nome_servidor, peso_servidor_grupo, saldo_servidor_grupo, id_servidor_grupo, " \
           "id_grupo_servidor_grupo " \
           "FROM servidores, servidores_grupos " \
@@ -211,65 +207,47 @@ def cupons(id_grupo):
         peso_atual = int(i[2])
         participa = 0
         nao_participa = 0
-        #print(i)
-
-
 
         # Se tiver so 1 Habilitado, Participa do Sorteio e Nao Altera o Saldo
         if verificaUm(linha):
             lista.append(mantemSaldo(linha))
+            print(i[1] + " | verificaUm()")
             return lista
 
-        if comparaSaldo(linha, id_i, saldo_atual, peso_atual):
-            if verificaLimites(saldo_atual, peso_atual):
-                participa += 1
-        else:
-            nao_participa += 1
 
+        # Verifica a diferenca dos que possuem Saldo Negativo
         if comparaSaldoNegativo(linha, id_i, saldo_atual):
+            lista.clear()
+            lista.append(list(i))
+            print(i[1] + " | comparaSaldoNegativo()")
+            return lista
+
+
+        # Verifica se o Saldo Atual esta abaixo de saldo_max
+        if verificaLimites(saldo_atual, peso_atual):
             participa += 1
+            print("\n" + i[1] + " | verificaLimites()")
         else:
             nao_participa += 1
 
 
-
-
-        # Verificar se tem só um estagiario e um Servidor
-        # Verificar saldos negativos
-
+        # Verifica se o Diferença entre todos e Menor que o Intervalo
+        if comparaSaldo(linha, id_i, saldo_atual, peso_atual):
+            participa += 1
+            print(i[1] + " | comparaSaldo()")
+        else:
+            nao_participa += 1
 
 
         # Se o Total de Vezes que Participa for Maior entra no Sorteio
-        if (participa >= nao_participa):
-
+        if (participa > nao_participa):
             lista.append(list(i))
 
     return lista
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 limpa_tela()
 cabecalho()
@@ -281,10 +259,9 @@ while opcao.lower() != 's':
 
     sorteio = list(cupons(1))# id_grupo
 
-
-    if len(sorteio) == 0:
+    if not sorteio:
         zera_saldo(1) # id_grupo
-        sorteio = cupons(1) # id_grupo
+        sorteio = list(cupons(1)) # id_grupo
 
     # Realiza o Sorteio
     # sorteado: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
@@ -301,10 +278,6 @@ while opcao.lower() != 's':
 
     exibe_saldo()
     opcao = input("\n[ ENTER ] para Distribuir ou [ S ] para Sair: ")
-
-
-
-
 
 
 # ---------------------------------------------------------------------------------------------------------------------

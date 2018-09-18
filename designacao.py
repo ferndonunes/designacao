@@ -23,8 +23,8 @@ import datetime
 
 
 # Variaveis Globais
-versao    = 'v2.2'
-data      = '17/09/2018'
+versao    = 'v3.0'
+data      = '18/09/2018'
 banco     = 'designacao.db'
 saldo_max = 4 # Intervalo = saldo_max // 2
 
@@ -43,102 +43,6 @@ def limpa_tela():
         os.system('clear')
     else:  # 'nt'
         os.system('cls')
-
-
-# Funçao que gera os cupons
-def cupons(id_grupo):
-
-    # Busca os Servidores por Grupo para Gerar os Cupons
-    con = sqlite3.connect(banco)
-
-    sql = "SELECT id_servidor, nome_servidor, peso_servidor_grupo, saldo_servidor_grupo, id_servidor_grupo, " \
-          "id_grupo_servidor_grupo " \
-          "FROM servidores, servidores_grupos " \
-          "WHERE st_servidor == 'A' AND id_servidor == id_servidor_servidor_grupo AND id_grupo_servidor_grupo == ?"
-
-    c = con.cursor()
-    c.execute(sql, str(id_grupo))
-    linha = c.fetchall()
-    con.close()
-    lista = []
-
-    # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
-    #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
-    for i in linha:
-        id_i = i[0]
-        saldo_atual = int(i[3])
-        peso_atual  = int(i[2])
-        participa = 0
-        nao_participa = 0
-
-        # Se tiver so 1 Habilitado, Participa do Sorteio e Nao Altera o Saldo
-        if (len(linha) == 1):
-            mantem_saldo = list(i)
-            mantem_saldo[3] = int(mantem_saldo[3] - 1)
-            lista.append(mantem_saldo)
-            return lista
-
-        # Monta a Lista por Peso para Estagiarios
-        if (saldo_atual < int(saldo_max // 2) and peso_atual == 1 and len(linha) > 1):
-
-            # Contador de Número de Servidores Peso 1
-            qtde_peso1 = 0
-
-            # Compara os Saldos dos Servidores de Peso 1
-            for y in linha:
-                id_y = y[0]
-                peso_y = int(y[2])
-                saldo_y = int(y[3])
-                diferenca = int(saldo_atual - saldo_y)
-
-                # Compara o Saldo com os Demais Servidores com o mesmo Peso
-                if((id_i != id_y) and (peso_y == 1)):
-
-                    qtde_peso1 = 1
-
-                    # Participa se a Diferença de Processos for Menor que o Intervalo
-                    if(diferenca < int(saldo_max // 2)):
-                        participa += 1
-                    else:
-                        nao_participa += 1
-
-            if (qtde_peso1 == 0):
-                participa +=1
-
-        # Lista por Peso para Servidores (Recebe 2x mais que Estagiários)
-        elif (saldo_atual < saldo_max and peso_atual == 2 and len(linha) > 1):
-
-            # Contador de Número de Servidores Peso 2
-            qtde_peso2 = 0
-
-            # Compara os Saldos dos Servidores de Peso 2
-            for x in linha:
-                id_x = x[0]
-                peso_x = int(x[2])
-                saldo_x = int(x[3])
-                diferenca = int(saldo_atual - saldo_x)
-
-
-                # Compara o Saldo com os Demais Servidores com o mesmo Peso
-                if((id_i != id_x) and (peso_x == 2)):
-
-                    qtde_peso2 = 1
-
-                    # Participa se a Diferença de Processos for Menor que o Intervalo
-                    if(diferenca < int(saldo_max // 2)):
-                        participa += 1
-                    else:
-                        nao_participa += 1
-
-            if (qtde_peso2 == 0):
-                participa +=1
-
-        # Se o Total de Vezes que Participa for Maior entra no Sorteio
-        if (participa > nao_participa):
-            lista.append(list(i))
-
-    #print("\nParticipantes: " + str(lista))
-    return lista
 
 
 # Atualiza o Saldo do Servidor no Grupo
@@ -171,8 +75,8 @@ def zera_saldo(id_grupo):
 
         if (saldo > saldo_max and peso == 2):
             novo_saldo = saldo - saldo_max
-        elif (saldo > (saldo_max // 2) and peso == 1):
-            novo_saldo = saldo - (saldo_max // 2)
+        elif (saldo > int((saldo_max // 2)) and peso == 1):
+            novo_saldo = saldo - int((saldo_max // 2))
         else:
             novo_saldo = 0
 
@@ -195,6 +99,132 @@ def atualiza_relatorio(id_servidor, id_grupo, processo, tp_designacao):
     c.execute(sql, (str(id_servidor), str(id_grupo), str(processo), str(hoje), str(tp_designacao)))
     con.commit()
     con.close()
+
+
+# FUNCOES NOVAS -------------------------------------------------------------------------------------------------------
+# Se tiver somente um, Participa da Distribuicao
+def verificaUm(linha):
+    if len(linha) == 1:
+        return True
+
+
+# Mantem o Saldo quando somente um Participa
+def mantemSaldo(linha):
+    mantem_saldo = list(linha[0])
+    mantem_saldo[3] = int(mantem_saldo[3] - 1)
+    return mantem_saldo
+
+
+# Verifica se esta dentro dos Limites do Saldo Maximo por peso
+def verificaLimites(saldo_atual, peso_atual):
+    if (int(saldo_atual) < int(saldo_max // 2) and peso_atual == 1):
+        return True
+    elif (int(saldo_atual) < int(saldo_max) and peso_atual == 2):
+        return True
+    else:
+        return False
+
+
+# Se a Diferenca do Saldo for Maior que o Intervalo, Participa
+def comparaSaldo(linha, id, saldo_atual, peso_atual):
+    for i in linha:
+        id_linha    = i[0]
+        peso_linha  = i[2]
+        saldo_linha = int(i[3])
+
+        # Verifica se a Diferença Entre os Colegas de Mesmo Peso e Menor que o Intervalo
+        if (id != id_linha and peso_atual == peso_linha):
+            if (int((saldo_atual - saldo_linha)) >= int(saldo_max // 2)):
+                return False
+
+        # Nao Participa se o Saldo for Positivo e tiver Alguem com Saldo Negativo
+        if (int(saldo_atual) >= 0 and int(saldo_linha) < 0):
+            return False
+
+        # Nao Participa se tiver Alguem com Saldo Negativo Maior que a Diferenca
+        if (int(saldo_atual) < 0 and int(saldo_linha) < 0):
+            if (int(abs(saldo_linha) - abs(saldo_atual)) >= int(saldo_max // 2)):
+                return False
+    return True
+
+
+# Compara diferenca em Saldos Negativos
+def comparaSaldoNegativo(linha, id, saldo_atual):
+    s = 0
+    n = 0
+    for i in linha:
+        id_linha    = i[0]
+        saldo_linha = int(i[3])
+
+        if (id != id_linha):
+            # Participa de os Dois forem Negativos com Diferença Menor que o Intervalo
+            if (int(saldo_atual) < 0 and int(saldo_linha) < 0):
+
+                if(int(saldo_atual) < int(saldo_linha)):
+                    if (int(abs(saldo_atual) - abs(saldo_linha)) >= int(saldo_max // 2)):
+                        s += 1
+                    else:
+                        n += 1
+                else:
+                    n += 1
+    if (s > n):
+        return True
+    else:
+        return False
+
+
+# Gera os Cupons de Sorteio
+def cupons(id_grupo):
+
+    # Busca os Servidores por Grupo para Gerar os Cupons
+    con = sqlite3.connect(banco)
+    sql = "SELECT id_servidor, nome_servidor, peso_servidor_grupo, saldo_servidor_grupo, id_servidor_grupo, " \
+          "id_grupo_servidor_grupo " \
+          "FROM servidores, servidores_grupos " \
+          "WHERE st_servidor = 'A' AND id_servidor = id_servidor_servidor_grupo AND id_grupo_servidor_grupo == ?"
+
+    c = con.cursor()
+    c.execute(sql, str(id_grupo))
+    linha = c.fetchall()
+    con.close()
+    lista = []
+
+    # Monta a Lista: [0] == ID_SERVIDOR / [1] == NOME / [2] == PESO / [3] == SALDO
+    #                [4] == ID_SERVIDOR_GRUPO / [5] == ID_GRUPO_SERVIDOR_GRUPO
+    for i in linha:
+        id_i = i[0]
+        saldo_atual = int(i[3])
+        peso_atual = int(i[2])
+        participa = 0
+        nao_participa = 0
+
+        # Se tiver so 1 Habilitado, Participa do Sorteio e Nao Altera o Saldo
+        if verificaUm(linha):
+            lista.append(mantemSaldo(linha))
+            return lista
+
+        # Verifica a diferenca dos que possuem Saldo Negativo
+        if comparaSaldoNegativo(linha, id_i, saldo_atual):
+            lista.clear()
+            lista.append(list(i))
+            return lista
+
+        # Verifica se o Saldo Atual esta abaixo de saldo_max
+        if verificaLimites(saldo_atual, peso_atual):
+            participa += 1
+        else:
+            nao_participa += 1
+
+        # Verifica se o Diferença entre todos e Menor que o Intervalo
+        if comparaSaldo(linha, id_i, saldo_atual, peso_atual):
+            participa += 1
+        else:
+            nao_participa += 1
+
+        # Se o Total de Vezes que Participa for Maior entra no Sorteio
+        if (participa > nao_participa):
+            lista.append(list(i))
+    return lista
 
 
 # ----------------------------------------------CODIGO DAS TELAS-------------------------------------------------------
@@ -252,7 +282,9 @@ def menu():
         # SAIR
         exit()
 
+
 # ---------------------------------------------------------------------------------------------------------------------4
+
 
 # Mostra a Tela do Relatorio
 def menu_relatorio():
@@ -313,7 +345,9 @@ def menu_relatorio():
     if (repetir.lower() == 'n'):
         menu()
 
+
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 # Compensa o Saldo Quando Redistribui para outro Servidor
 def menu_redistribuicao():
@@ -422,7 +456,9 @@ def menu_redistribuicao():
     if (repetir.lower() == 'n'):
         menu()
 
+
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 # Função que monta a Tela de Mudança do Status da Designaçao
 def alterar_designacao(st, nova_st):
@@ -480,7 +516,9 @@ def alterar_designacao(st, nova_st):
     if (repetir.lower() == 'n'):
         menu()
 
+
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 # Funçao que monta a Tela JUDICIAL
 def menu_designacao(tp):
@@ -534,6 +572,13 @@ def menu_designacao(tp):
     id_servidor = 0
 
     print("\n********* Servidores com Distribuição Aberta no Grupo *********\n")
+
+
+    # Tratamento de Erro em caso de Todos Servidores Bloqueados
+    if not linha:
+        input("NÃO há Servidores Habilitados neste Grupo [ENTER] Continuar: ")
+        menu_designacao(tp)
+
 
     for i in linha:
         print("[ " + str(i[0]) + " ]" + " - "+ str(i[1]))
@@ -604,7 +649,7 @@ def menu_designacao(tp):
             # Chama as Funçao de Geraçao dos Cupons
             sorteio = cupons(int(id_grupo))  # Parametro: ID_GRUPO
 
-            if len(sorteio) == 0:
+            if not sorteio:
                 zera_saldo(id_grupo)  # Parâmetro: ID_GRUPO
                 sorteio = cupons(id_grupo)  # Parametro: ID_GRUPO
 
@@ -633,9 +678,12 @@ def menu_designacao(tp):
         if (repetir.lower() == 'n'):
             menu()
 
+
 # ---------------------------------------------------------------------------------------------------------------------
+
 
 # Chamada Inicial do Sistema
 menu()
+
 
 # lista2 = lista[:] # Para Copiar a lista em uma nova Variável
