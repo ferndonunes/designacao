@@ -211,7 +211,7 @@ def cupons(id_grupo):
         # Se tiver so 1 Habilitado, Participa do Sorteio e Nao Altera o Saldo
         if verificaUm(linha):
             lista.append(mantemSaldo(linha))
-            print(i[1] + " | verificaUm()")
+            #print(i[1] + " | verificaUm()")
             return lista
 
 
@@ -219,14 +219,14 @@ def cupons(id_grupo):
         if comparaSaldoNegativo(linha, id_i, saldo_atual):
             lista.clear()
             lista.append(list(i))
-            print(i[1] + " | comparaSaldoNegativo()")
+            #print(i[1] + " | comparaSaldoNegativo()")
             return lista
 
 
         # Verifica se o Saldo Atual esta abaixo de saldo_max
         if verificaLimites(saldo_atual, peso_atual):
             participa += 1
-            print("\n" + i[1] + " | verificaLimites()")
+            #print("\n" + i[1] + " | verificaLimites()")
         else:
             nao_participa += 1
 
@@ -234,7 +234,7 @@ def cupons(id_grupo):
         # Verifica se o Diferença entre todos e Menor que o Intervalo
         if comparaSaldo(linha, id_i, saldo_atual, peso_atual):
             participa += 1
-            print(i[1] + " | comparaSaldo()")
+            #print(i[1] + " | comparaSaldo()")
         else:
             nao_participa += 1
 
@@ -256,7 +256,7 @@ opcao = input("\n[ ENTER ] para Distribuir ou [ S ] para Sair: ")
 while opcao.lower() != 's':
 
     limpa_tela()
-
+    nomes = ''
     sorteio = list(cupons(1))# id_grupo
 
     if not sorteio:
@@ -273,8 +273,11 @@ while opcao.lower() != 's':
     atualiza_saldo(sorteado[3], sorteado[4]) # Parametros: NOVO_SALDO, ID_SERVIDOR_GRUPO
 
     cabecalho()
-    print("\n" + str(sorteio))
-    print("\n>>> *** Sorteado *** <<<: " + sorteado[1] + "\n")
+    print("Participantes:")
+    for n in sorteio:
+        nomes += "[" + str(n[1]) + "]\n"
+    print("\n" + nomes)
+    print(">>> *** Sorteado *** <<<: " + sorteado[1] + "\n")
 
     exibe_saldo()
     opcao = input("\n[ ENTER ] para Distribuir ou [ S ] para Sair: ")
