@@ -23,7 +23,7 @@ import datetime
 
 
 # Variaveis Globais
-versao    = 'v3.1'
+versao    = 'v3.2'
 data      = '27/09/2018'
 banco     = 'designacao.db'
 saldo_max = 4 # Intervalo = saldo_max // 2
@@ -245,7 +245,7 @@ def menu():
     print("[ S ] - SAIR")
 
     # Carrega o Menu enquanto nao Escolher uma Opçao Valida
-    opcoes = ['1','2','3','4','5','6','s','S']
+    opcoes = ['1','2','3','4','5','6','s','S','ciclo','geral']
     escolha = input("\nEscolha sua Opção [1/2/3/4/5/6] ou [S]air: ")
     while str(escolha.lower()) not in opcoes:
         menu()
@@ -274,9 +274,13 @@ def menu():
         # REDISTRIBUICAO
         menu_redistribuicao()
 
-    #elif escolha == '7':
-    #    # RELATORIOS
-    #    menu_relatorio()
+    elif escolha == 'geral':
+        # RELATORIOS
+        menu_relatorio()
+
+    elif escolha == 'ciclo':
+        # RELATORIOS
+        ciclo()
 
     elif escolha.lower() == 's':
         # SAIR
@@ -345,6 +349,31 @@ def menu_relatorio():
     if (repetir.lower() == 'n'):
         menu()
 
+
+
+# Relatorio com o Saldo do Ciclo
+def ciclo():
+    # Gera o Relatorio
+    con = sqlite3.connect(banco)
+    sql = "SELECT nome_servidor,  nome_grupo, saldo_servidor_grupo " \
+            "FROM servidores, grupos, servidores_grupos " \
+                "WHERE id_servidor == id_servidor_servidor_grupo and id_grupo == id_grupo_servidor_grupo " \
+                    "ORDER BY nome_servidor,  saldo_servidor_grupo"
+    c = con.cursor()
+    c.execute(sql)
+    linha = c.fetchall()
+    con.close()
+
+    limpa_tela()
+    cabecalho()
+    print("\n  SALDO DOS SERVIDORES (ATIVOS e TRANCADOS) NO CICLO CORRENTE")
+    print("\n*********** Distribuições por Grupo no Ciclo Atual ************\n")
+
+    for i in linha:
+        print(i[0] + " : " + str(i[1]) + " = " + str(i[2]))
+
+    repetir = input("\nPressione [ENTER] para voltar ao MENU PRINCIPAL: ")
+    menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
