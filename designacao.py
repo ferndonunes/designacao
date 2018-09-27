@@ -23,8 +23,8 @@ import datetime
 
 
 # Variaveis Globais
-versao    = 'v3.0'
-data      = '18/09/2018'
+versao    = 'v3.1'
+data      = '27/09/2018'
 banco     = 'designacao.db'
 saldo_max = 4 # Intervalo = saldo_max // 2
 
@@ -240,13 +240,13 @@ def menu():
     print("[ 3 ] - DISTRIBUIR DOCUMENTO")
     print("[ 4 ] - TRANCAR DISTRIBUIÇÃO")
     print("[ 5 ] - ABRIR DISTRIBUIÇÃO")
-    print("[ 6 ] - RELATÓRIOS")
-    print("[ 7 ] - REDISTRIBUIR")
+    print("[ 6 ] - DIMINUIR SALDO OU REDISTRIBUIR")
+    #print("[ 7 ] - RELATÓRIOS")
     print("[ S ] - SAIR")
 
     # Carrega o Menu enquanto nao Escolher uma Opçao Valida
-    opcoes = ['1','2','3','4','5','6','7','s','S']
-    escolha = input("\nEscolha sua Opção [1/2/3/4/5/6/7] ou [S]air: ")
+    opcoes = ['1','2','3','4','5','6','s','S']
+    escolha = input("\nEscolha sua Opção [1/2/3/4/5/6] ou [S]air: ")
     while str(escolha.lower()) not in opcoes:
         menu()
 
@@ -271,12 +271,12 @@ def menu():
         alterar_designacao('B', 'A')
 
     elif escolha == '6':
-        # RELATORIOS
-        menu_relatorio()
-
-    elif escolha == '7':
         # REDISTRIBUICAO
         menu_redistribuicao()
+
+    #elif escolha == '7':
+    #    # RELATORIOS
+    #    menu_relatorio()
 
     elif escolha.lower() == 's':
         # SAIR
