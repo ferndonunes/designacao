@@ -16,6 +16,8 @@
 """
 
 # Importação dos Módulos Necessários
+#from os import system as os
+
 import os
 import random
 import sqlite3
@@ -23,8 +25,8 @@ import datetime
 
 
 # Variaveis Globais
-versao    = 'v3.2'
-data      = '27/09/2018'
+versao    = 'v3.3'
+data      = '02/10/2018'
 banco     = 'designacao.db'
 saldo_max = 4 # Intervalo = saldo_max // 2
 
@@ -241,8 +243,8 @@ def menu():
     print("[ 4 ] - TRANCAR DISTRIBUIÇÃO")
     print("[ 5 ] - ABRIR DISTRIBUIÇÃO")
     print("[ 6 ] - DIMINUIR SALDO OU REDISTRIBUIR")
-    #print("[ 7 ] - RELATÓRIOS")
     print("[ S ] - SAIR")
+    #print("[ 7 ] - RELATÓRIOS")
 
     # Carrega o Menu enquanto nao Escolher uma Opçao Valida
     opcoes = ['1','2','3','4','5','6','s','S','ciclo','geral']
@@ -372,7 +374,7 @@ def ciclo():
     for i in linha:
         print(i[0] + " : " + str(i[1]) + " = " + str(i[2]))
 
-    repetir = input("\nPressione [ENTER] para voltar ao MENU PRINCIPAL: ")
+    input("\nPressione [ENTER] para voltar ao MENU PRINCIPAL: ")
     menu()
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -441,13 +443,13 @@ def menu_redistribuicao():
     if (id_grupo.lower() == 's'):
         menu_redistribuicao()
 
-    qt_processos = input("\nNúmero de Processos REDISTRIBUÍDOS ou [S]air: ")
+    qt_processos = input("\nInforme Quantos Processos serão REDISTRIBUÍDOS ou [S]air: ")
 
     while (not qt_processos.isnumeric()):
         if (qt_processos.lower() == 's'):
             menu()
             break
-        qt_processos = input("\nNúmero de Processos que foram REDISTRIBUÍDOS ou [S]air: ")
+        qt_processos = input("\nInforme Quantos Processos serão REDISTRIBUÍDOS ou [S]air: ")
 
 
     # Busca o Saldo Atual do Grupo Escolhido
